@@ -74,9 +74,9 @@ app.post('/login', async (req, res) => {
         }
 
         const secertKey = process.env.SECRET_KEY
-        const token = jwt.sign({username}, secertKey, {expiresIn: '1h'})
+        const token = jwt.sign({username}, secertKey, {expiresIn: '1d'})
 
-        res.status(200).send({ token })
+        res.status(200).send({token})
     })
 
 })
@@ -171,8 +171,8 @@ app.get('/retrieve/songs/:id', async (req, res) => {
 /**
  * works correctly
  */
-app.post('/add/song/:playlistId', async (req, res) => {
-    const playlistId = req.params.playlistId
+app.post('/add/song', async (req, res) => {
+    const playlistId = req.body.playlistId
 
     const videoId = req.body.videoId
     const title = req.body.title
