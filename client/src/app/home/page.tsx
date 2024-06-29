@@ -52,13 +52,22 @@ const Page = () => {
     }
   }
 
+  const searchYoutubeWithVoice =  async(searchTitle: any) => {
+    try{
+      const response = await youtubeService.search(searchTitle)
+      setResults(response)
+    }catch(error){
+      console.log('This error occured', error)
+    }
+  }
+
   return (
     <div className='flex bg-black min-h-screen'>
       
       <SideBar playlists={playlists} />
 
       <div className='flex-grow ml-64'>
-        <Search searchQuery={searchQuery} changeSearchQuery={changeSearchQuery} searchYoutube={searchYoutube} />
+        <Search searchQuery={searchQuery} changeSearchQuery={changeSearchQuery} searchYoutube={searchYoutube} searchYoutubeWithVoice={searchYoutubeWithVoice} />
         {results && results.length > 0 ? (
           <SearchResults results={results} />
         ): (

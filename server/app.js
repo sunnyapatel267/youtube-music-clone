@@ -3,15 +3,28 @@ import cors from 'cors'
 import bcrypt from 'bcrypt'
 import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken'
+import fs from 'fs'
 import youtube from './youtube.js'
 import { addSong, createPlaylist, getCrediential, getPlaylist, getSongs, getUserPlaylist, insertCrediential } from './database.js'
+import {Shazam} from 'node-shazam'
+import bodyParser from 'body-parser'
 
 dotenv.config()
 
 const app = express()
 
 app.use(express.json())
-app.use(cors())
+
+const corsOptions = {
+    origin: 'http://localhost:3000',
+    credentials: true, 
+    optionsSuccessStatus: 200,
+}
+  
+app.use(cors(corsOptions))
+
+app.use(bodyParser.json({ limit: '100mb' }));
+app.use(bodyParser.urlencoded({ limit: '100mb', extended: true }));
 
 app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
@@ -184,9 +197,26 @@ app.post('/add/song', async (req, res) => {
     res.status(200).send({message: 'Successful'})
 })
 
+app.post('/recognize', async (req, res) => {
+    const { audioData } = req.body
+
+    const buffer = Buffer.from(audioData, 'base64')
+    const filePath = path.join(__dirname, 'audio.wav')
+    fs.writeFileSync(filePath, buffer)
+
+    try {
+        const result = await Shazam.recognise(filePath, 'en-US')
+        res.json(result)
+    } catch(error) {
+        res.status(500).send('Error recognizing track')
+    } finally {
+        fs.unlinkSync(filePath)
+    }
+})
+
 app.use((err, req, res, next) => {
     console.error(err.stack)
-    res.staus(500).send('Something broke!')
+    res.status(500).send('Something broke!')
 })
 
 const port = 8080
